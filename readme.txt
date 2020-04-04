@@ -3,8 +3,9 @@ Contributors: kylephillips
 Donate link: http://favoriteposts.com/
 Tags: favorites, like, bookmark, favorite, likes, bookmarks, favourite, favourites, multisite, wishlist, wish list
 Requires at least: 3.8
+Requires PHP: 5.4
 Tested up to: 5.4
-Stable tag: 2.1.6
+Stable tag: 2.3.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,11 +29,19 @@ Visit [favoriteposts.com](http://favoriteposts.com) for a full list of available
 
 **Designed for Developers** - Favorites works great out-of-the-box for beginners, but a full set of template functions unlocks just about any sort of custom functionality developers may need. Favorites outputs the minimum amount of markup needed, putting the style and control in your hands.
 
+**GDPR**
+
+As of version 2.2, a setting is provided to help comply with GDPR standards. To enable this setting, visit Settings > Favorites > Users, and check the field under "User Cookie Consent." When this setting is enabled, the content saved under the setting displays in a modal window, and the user must agree to the terms you provide before favorite cookies can be saved. Note: There is no language provided by default. This should be supplied by a qualified attorney or legal entity. Once the user has approved or denied cookies, that is saved in the "simplefavorites" cookie along with the timestamp of approval or denial. If the site is part of a multi-site installation, the setting will carry through to all sites.
+
+If your site already has a cookie compliance solution in place, there are two document-level jQuery events that may be triggered in order to approve or deny cookies in the background.
+
+To approve the use of cookies, trigger the event "favorites-user-consent-approved". To deny the use of cookies, trigger the event "favorites-user-consent-denied".
+
 **Multisite Compatible** - As of version 1.1.0, Favorites is multisite compatible. User favorites are saved on a site/blog basis, and may be retrieved and displayed across sites.
 
 For more information visit [favoriteposts.com](http://favoriteposts.com).
 
-**Important: Favorites requires WordPress version 3.8 or higher, and PHP version 5.3.2 or higher.**
+**Important: Favorites requires WordPress version 3.8 or higher, and PHP version 5.4 or higher.**
 
 
 == Installation ==
@@ -71,6 +80,17 @@ As of version 1.1.0, Favorites is compatible with multisite installations. By de
 
 
 == Changelog ==
+
+= 2.3.1 =
+* Bug Fix: Fixes issue where only one custom field was being output when multiple were specified in the custom list html.
+* Security Update: Removes potential security issue where user may favorite a non-public post, or a post where favorites are not enabled.
+
+= 2.3.0 =
+* Security Update: Removes ability for users to manipulate favorites belonging to other users. Thanks to Arne van Hoorn for uncovering this issue.
+
+= 2.2.0 =
+* Fixes multisite issue where favorites were not being retrieved correctly.
+* Adds setting to require consenting to cookies before saving favorites, in an effort to adhere to GDPR compliance. Note: the modal content that displays when this setting is enabled should be provided by a qualified attorney or legal entity. Should your site already have a cookie consent protocol in place, document-level events are provided for triggering the user preferences.
 
 = 2.1.6 =
 * Adds option of redirecting to a page/post by ID if an anonmyous user attempts to favorite an item
