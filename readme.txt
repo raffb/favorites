@@ -4,8 +4,8 @@ Donate link: http://favoriteposts.com/
 Tags: favorites, like, bookmark, favorite, likes, bookmarks, favourite, favourites, multisite, wishlist, wish list
 Requires at least: 3.8
 Requires PHP: 5.4
-Tested up to: 5.4
-Stable tag: 2.3.1
+Tested up to: 5.7
+Stable tag: 2.3.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -62,7 +62,7 @@ As of version 1.1.0, Favorites is compatible with multisite installations. By de
 
 == Screenshots ==
 
-1. Developer-friendly – easily unenqueue styles if you are combining and minifying your own. 
+1. Developer-friendly – easily unenqueue styles if you are combining and minifying your own.
 
 2. Enable for anonymous users and save in the session or a browser cookie. Logged-in users' favorites are saved in a custom user meta field.
 
@@ -80,6 +80,9 @@ As of version 1.1.0, Favorites is compatible with multisite installations. By de
 
 
 == Changelog ==
+
+= 2.3.2 =
+* Security update.
 
 = 2.3.1 =
 * Bug Fix: Fixes issue where only one custom field was being output when multiple were specified in the custom list html.
@@ -210,7 +213,7 @@ As of version 1.1.0, Favorites is compatible with multisite installations. By de
 * Tested for 4.2 compatibility
 
 = 1.0 =
-* Initial release 
+* Initial release
 
 
 == Upgrade Notice ==

@@ -21,7 +21,7 @@ class FavoriteList extends AJAXListenerBase
 		parent::__construct();
 		$this->setData();
 		$this->getList();
-		wp_send_json(array('status' => 'success', 'list' => $this->list, 'data' => $this->data));
+		wp_send_json(['status' => 'success', 'list' => $this->list, 'data' => $this->data]);
 	}
 
 	/**
@@ -38,11 +38,6 @@ class FavoriteList extends AJAXListenerBase
 		$this->data['include_excerpt'] = ( isset($_POST['include_excerpt']) && $_POST['include_excerpt'] == 'true' ) ? true : false;
 		$this->data['no_favorites'] = ( isset($_POST['no_favorites']) ) ? sanitize_text_field($_POST['no_favorites']) : '';
 		$this->data['post_types'] = ( isset($_POST['post_types']) ) ? explode(',', $_POST['post_types']) : array();
-
-		// For Cached Sites
-		if ( !isset($_POST['logged_in']) || intval($_POST['logged_in']) !== 1 ) return;
-		if ( !isset($_POST['user_id_current']) ) return;
-		if ( !$this->data['user_id'] ) $this->data['user_id'] = intval($_POST['user_id_current']);
 	}
 
 	/**
@@ -54,7 +49,7 @@ class FavoriteList extends AJAXListenerBase
 		$site_id = ( is_multisite() && is_null($site_id) ) ? $blog_id : $site_id;
 		if ( !is_multisite() ) $site_id = 1;
 
-		$filters = ( !empty($this->data['post_types']) ) ? array('post_type' => $this->data['post_types']) : null;
+		$filters = ( !empty($this->data['post_types']) ) ? ['post_type' => $this->data['post_types']] : null;
 		
 		$favorites = new UserFavorites(
 			$this->data['user_id'], 

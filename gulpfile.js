@@ -23,7 +23,6 @@ var js_frontend_source = [
 	'assets/js/src/favorites.utilities.js',
 	'assets/js/src/favorites.formatter.js',
 	'assets/js/src/favorites.button-options-formatter.js',
-	'assets/js/src/favorites.noncegenerator.js',
 	'assets/js/src/favorites.user-favorites.js',
 	'assets/js/src/favorites.clear.js',
 	'assets/js/src/favorites.lists.js',
@@ -32,6 +31,7 @@ var js_frontend_source = [
 	'assets/js/src/favorites.total-count.js',
 	'assets/js/src/favorites.post-favorite-count.js',
 	'assets/js/src/favorites.require-authentication.js',
+	'assets/js/src/favorites.require-consent.js',
 	'assets/js/src/favorites.factory.js'
 ];
 

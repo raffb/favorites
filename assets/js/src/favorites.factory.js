@@ -32,6 +32,7 @@ Favorites.selectors = {
 	clear_button : '.simplefavorites-clear', // Clear Button
 	total_favorites : '.simplefavorites-user-count', // Total Favorites (from the_user_favorites_count)
 	modals : 'data-favorites-modal', // Modals
+	consentModal : 'data-favorites-consent-modal', // Consent Modal
 	close_modals : 'data-favorites-modal-close', // Link/Button to close the modals
 	count : '.simplefavorite-button-count', // The count inside the favorites button 
 	post_favorite_count : 'data-favorites-post-count-id' // The total number of times a post has been favorited
@@ -50,7 +51,6 @@ Favorites.cssClasses = {
 */
 Favorites.jsData = {
 	ajaxurl : favorites_data.ajaxurl, // The WP AJAX URL
-	nonce : null, // The Dynamically-Generated Nonce
 	favorite : favorites_data.favorite, // Active Button Text/HTML
 	favorited : favorites_data.favorited, // Inactive Button Text
 	include_count : favorites_data.includecount, // Whether to include the count in buttons
@@ -84,11 +84,11 @@ Favorites.authenticated = true;
 * WP Form Actions Used by the Plugin
 */
 Favorites.formActions = {
-	nonce : 'favorites_nonce',
 	favoritesarray : 'favorites_array',
 	favorite : 'favorites_favorite',
 	clearall : 'favorites_clear',
-	favoritelist : 'favorites_list'
+	favoritelist : 'favorites_list',
+	cookieConsent : 'favorites_cookie_consent'
 }
 
 /**
@@ -101,7 +101,6 @@ Favorites.Factory = function()
 
 	plugin.build = function()
 	{
-		new Favorites.NonceGenerator;
 		new Favorites.UserFavorites;
 		new Favorites.Lists;
 		new Favorites.Clear;
@@ -110,6 +109,7 @@ Favorites.Factory = function()
 		new Favorites.TotalCount;
 		new Favorites.PostFavoriteCount;
 		new Favorites.RequireAuthentication;
+		new Favorites.RequireConsent;
 	}
 
 	return plugin.build();

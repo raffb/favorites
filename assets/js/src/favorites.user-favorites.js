@@ -12,8 +12,8 @@ Favorites.UserFavorites = function()
 
 	plugin.bindEvents = function()
 	{
-		$(document).on('favorites-nonce-generated', function(){
-			plugin.initalLoad = true;
+		$(window).on('load', function(){
+			plugin.initialLoad = true;
 			plugin.getFavorites();
 		});
 	}
@@ -28,9 +28,7 @@ Favorites.UserFavorites = function()
 			type: 'POST',
 			datatype: 'json',
 			data: {
-				action : Favorites.formActions.favoritesarray,
-				logged_in : Favorites.jsData.logged_in,
-				user_id : Favorites.jsData.user_id
+				action : Favorites.formActions.favoritesarray
 			},
 			success: function(data){
 				if ( Favorites.jsData.dev_mode ) {
@@ -38,11 +36,11 @@ Favorites.UserFavorites = function()
 					console.log(data);
 				}
 				Favorites.userFavorites = data.favorites;
-				$(document).trigger('favorites-user-favorites-loaded', [plugin.initalLoad]);
+				$(document).trigger('favorites-user-favorites-loaded', [data.favorites, plugin.initialLoad]);
 				$(document).trigger('favorites-update-all-buttons');
 
 				// Deprecated Callback
-				if ( plugin.initalLoad ) favorites_after_initial_load(Favorites.userFavorites);
+				if ( plugin.initialLoad ) favorites_after_initial_load(Favorites.userFavorites);
 			},
 			error: function(data){
 				if ( !Favorites.jsData.dev_mode ) return;

@@ -204,61 +204,6 @@ Favorites.ButtonOptionsFormatter = function()
 	}
 }
 /**
-* Generates a new nonce on page load via AJAX
-* Solves problem of cached pages and expired nonces
-*
-* Events:
-* favorites-nonce-generated: The nonce has been generated
-*/
-var Favorites = Favorites || {};
-
-Favorites.NonceGenerator = function()
-{
-	var plugin = this;
-	var $ = jQuery;
-
-	plugin.bindEvents = function()
-	{
-		$(document).ready(function(){
-			if ( Favorites.jsData.dev_mode ){
-				console.log('Favorites Localized Data');
-				console.log(Favorites.jsData);
-			}
-			plugin.getNonce();
-		});
-	}
-
-	/**
-	* Make the AJAX call to get the nonce
-	*/
-	plugin.getNonce = function()
-	{
-		if ( Favorites.jsData.cache_enabled === '' ){
-			Favorites.jsData.nonce = favorites_data.nonce;
-			return;
-		}
-		$.ajax({
-			url: Favorites.jsData.ajaxurl,
-			type: 'POST',
-			datatype: 'json',
-			data: {
-				action : Favorites.formActions.nonce,
-				logged_in : Favorites.jsData.logged_in,
-				user_id : Favorites.jsData.user_id
-			},
-			success: function(data){
-				Favorites.jsData.nonce = data.nonce;
-				if ( Favorites.jsData.dev_mode ){
-					console.log('Nonce successfully generated: ' + data.nonce);
-				}
-				$(document).trigger('favorites-nonce-generated', [data.nonce]);
-			}
-		});
-	}
-
-	return plugin.bindEvents();
-}
-/**
 * Gets the user favorites
 */
 var Favorites = Favorites || {};
@@ -272,8 +217,8 @@ Favorites.UserFavorites = function()
 
 	plugin.bindEvents = function()
 	{
-		$(document).on('favorites-nonce-generated', function(){
-			plugin.initalLoad = true;
+		$(window).on('load', function(){
+			plugin.initialLoad = true;
 			plugin.getFavorites();
 		});
 	}
@@ -288,9 +233,7 @@ Favorites.UserFavorites = function()
 			type: 'POST',
 			datatype: 'json',
 			data: {
-				action : Favorites.formActions.favoritesarray,
-				logged_in : Favorites.jsData.logged_in,
-				user_id : Favorites.jsData.user_id
+				action : Favorites.formActions.favoritesarray
 			},
 			success: function(data){
 				if ( Favorites.jsData.dev_mode ) {
@@ -298,11 +241,11 @@ Favorites.UserFavorites = function()
 					console.log(data);
 				}
 				Favorites.userFavorites = data.favorites;
-				$(document).trigger('favorites-user-favorites-loaded', [plugin.initalLoad]);
+				$(document).trigger('favorites-user-favorites-loaded', [data.favorites, plugin.initialLoad]);
 				$(document).trigger('favorites-update-all-buttons');
 
 				// Deprecated Callback
-				if ( plugin.initalLoad ) favorites_after_initial_load(Favorites.userFavorites);
+				if ( plugin.initialLoad ) favorites_after_initial_load(Favorites.userFavorites);
 			},
 			error: function(data){
 				if ( !Favorites.jsData.dev_mode ) return;
@@ -359,10 +302,7 @@ Favorites.Clear = function()
 			datatype: 'json',
 			data: {
 				action : Favorites.formActions.clearall,
-				nonce : Favorites.jsData.nonce,
-				siteid : site_id,
-				logged_in : Favorites.jsData.logged_in,
-				user_id : Favorites.jsData.user_id
+				siteid : site_id
 			},
 			success : function(data){
 				if ( Favorites.jsData.dev_mode ){
@@ -465,6 +405,7 @@ Favorites.Lists = function()
 	*/
 	plugin.updateAllLists = function()
 	{
+		if ( typeof Favorites.userFavorites === 'undefined' ) return;
 		for ( var i = 0; i < Favorites.userFavorites.length; i++ ){
 			var lists = $(Favorites.selectors.list + '[data-siteid="' + Favorites.userFavorites[i].site_id + '"]');
 			for ( var c = 0; c < $(lists).length; c++ ){
@@ -495,7 +436,6 @@ Favorites.Lists = function()
 			dataType: 'json',
 			data: {
 				action : Favorites.formActions.favoritelist,
-				nonce : Favorites.jsData.nonce,
 				userid : user_id,
 				siteid : site_id,
 				include_links : include_links,
@@ -504,9 +444,7 @@ Favorites.Lists = function()
 				thumbnail_size : thumbnail_size,
 				include_excerpt : include_excerpt,
 				no_favorites : no_favorites,
-				post_types : post_types,
-				user_id_current : Favorites.jsData.user_id,
-				logged_in : Favorites.jsData.logged_in
+				post_types : post_types
 			},
 			success : function(data){
 				if ( Favorites.jsData.dev_mode ){
@@ -603,6 +541,8 @@ Favorites.Button = function()
 		plugin.data.post_id = $(plugin.activeButton).attr('data-postid');
 		plugin.data.site_id = $(plugin.activeButton).attr('data-siteid');
 		plugin.data.status = ( $(plugin.activeButton).hasClass('active') ) ? 'inactive' : 'active';
+		var consentProvided = $(plugin.activeButton).attr('data-user-consent-accepted');
+		plugin.data.user_consent_accepted = ( typeof consentProvided !== 'undefined' && consentProvided !== '' ) ? true : false;
 	}
 
 	/**
@@ -612,19 +552,18 @@ Favorites.Button = function()
 	{
 		plugin.loading(true);
 		plugin.setData();
+		var formData = {
+			action : Favorites.formActions.favorite,
+			postid : plugin.data.post_id,
+			siteid : plugin.data.site_id,
+			status : plugin.data.status,
+			user_consent_accepted : plugin.data.user_consent_accepted
+		}
 		$.ajax({
 			url: Favorites.jsData.ajaxurl,
 			type: 'post',
 			dataType: 'json',
-			data: {
-				action : Favorites.formActions.favorite,
-				nonce : Favorites.jsData.nonce,
-				postid : plugin.data.post_id,
-				siteid : plugin.data.site_id,
-				status : plugin.data.status,
-				logged_in : Favorites.jsData.logged_in,
-				user_id : Favorites.jsData.user_id
-			},
+			data: formData,
 			success: function(data){
 				if ( Favorites.jsData.dev_mode ) {
 					console.log('The favorite was successfully saved.');
@@ -636,6 +575,11 @@ Favorites.Button = function()
 					plugin.data.status = 'inactive';
 					$(document).trigger('favorites-update-all-buttons');
 					$(document).trigger('favorites-require-authentication', [plugin.data]);
+					return;
+				}
+				if ( data.status === 'consent_required' ){
+					plugin.loading(false);
+					$(document).trigger('favorites-require-consent', [data, plugin.data, plugin.activeButton]);
 					return;
 				}
 				Favorites.userFavorites = data.favorites;
@@ -740,6 +684,7 @@ Favorites.ButtonUpdater = function()
 	*/
 	plugin.updateAllButtons = function(list)
 	{
+		if ( typeof Favorites.userFavorites === 'undefined' ) return;
 		var buttons = ( typeof list === undefined && list !== '' ) 
 			? $(list).find(Favorites.selectors.button) 
 			: $(Favorites.selectors.button);
@@ -986,6 +931,113 @@ Favorites.RequireAuthentication = function()
 	return plugin.bindEvents();
 }
 /**
+* Favorites Require Consent Modal Agreement
+*/
+var Favorites = Favorites || {};
+
+Favorites.RequireConsent = function()
+{
+	var plugin = this;
+	var $ = jQuery;
+
+	plugin.consentData;
+	plugin.postData;
+	plugin.activeButton;
+
+	plugin.bindEvents = function()
+	{
+		$(document).on('favorites-require-consent', function(event, consent_data, post_data, active_button){
+			plugin.consentData = consent_data;
+			plugin.postData = post_data;
+			plugin.activeButton = active_button;
+			plugin.openModal();
+		});
+		$(document).on('favorites-user-consent-approved', function(e, button){
+			if ( typeof button !== 'undefined' ){
+				$(plugin.activeButton).attr('data-user-consent-accepted', 'true');
+				$(plugin.activeButton).click();
+				plugin.closeModal();
+				return;
+			}
+			plugin.setConsent(true);
+		});
+		$(document).on('favorites-user-consent-denied', function(){
+			plugin.setConsent(false);
+		});
+		$(document).on('click', '.simplefavorites-modal-backdrop', function(e){
+			plugin.closeModal();
+		});
+		$(document).on('click', '[data-favorites-consent-deny]', function(e){
+			e.preventDefault();
+			plugin.closeModal();
+			$(document).trigger('favorites-user-consent-denied');
+		});
+		$(document).on('click', '[data-favorites-consent-accept]', function(e){
+			e.preventDefault();
+			$(document).trigger('favorites-user-consent-approved', [$(this)]);
+		});
+	}
+
+	/**
+	* Open the Modal
+	*/
+	plugin.openModal = function()
+	{
+		plugin.buildModal();
+		setTimeout(function(){
+			$('[' + Favorites.selectors.consentModal + ']').addClass('active');
+		}, 10);
+	}
+
+	/**
+	* Build the Modal
+	*/
+	plugin.buildModal = function()
+	{
+		var modal = $('[' + Favorites.selectors.consentModal + ']');
+		if ( modal.length > 0 ) return;
+		var html = '<div class="simplefavorites-modal-backdrop" ' + Favorites.selectors.consentModal + '></div>';
+		html += '<div class="simplefavorites-modal-content" ' + Favorites.selectors.consentModal + '>';
+		html += '<div class="simplefavorites-modal-content-body no-padding">';
+		html += '<div class="simplefavorites-modal-content-interior">';
+		html += plugin.consentData.message;
+		html += '</div>';
+		html += '<div class="simplefavorites-modal-content-footer">'
+		html += '<button class="simplefavorites-button-consent-deny" data-favorites-consent-deny>' + plugin.consentData.deny_text + '</button>';
+		html += '<button class="simplefavorites-button-consent-accept" data-favorites-consent-accept>' + plugin.consentData.accept_text + '</button>';
+		html += '</div><!-- .simplefavorites-modal-footer -->';
+		html += '</div><!-- .simplefavorites-modal-content-body -->';
+		html += '</div><!-- .simplefavorites-modal-content -->';
+		$('body').prepend(html);
+	}
+
+	/**
+	* Close the Modal
+	*/
+	plugin.closeModal = function()
+	{
+		$('[' + Favorites.selectors.consentModal + ']').removeClass('active');
+	}
+
+	/**
+	* Submit a manual deny/consent
+	*/
+	plugin.setConsent = function(consent)
+	{
+		$.ajax({
+			url: Favorites.jsData.ajaxurl,
+			type: 'post',
+			dataType: 'json',
+			data: {
+				action : Favorites.formActions.cookieConsent,
+				consent : consent
+			}
+		});
+	}
+
+	return plugin.bindEvents();
+}
+/**
 * Primary Favorites Initialization
 * @package Favorites
 * @author Kyle Phillips - https://github.com/kylephillips/favorites
@@ -1019,6 +1071,7 @@ Favorites.selectors = {
 	clear_button : '.simplefavorites-clear', // Clear Button
 	total_favorites : '.simplefavorites-user-count', // Total Favorites (from the_user_favorites_count)
 	modals : 'data-favorites-modal', // Modals
+	consentModal : 'data-favorites-consent-modal', // Consent Modal
 	close_modals : 'data-favorites-modal-close', // Link/Button to close the modals
 	count : '.simplefavorite-button-count', // The count inside the favorites button 
 	post_favorite_count : 'data-favorites-post-count-id' // The total number of times a post has been favorited
@@ -1037,7 +1090,6 @@ Favorites.cssClasses = {
 */
 Favorites.jsData = {
 	ajaxurl : favorites_data.ajaxurl, // The WP AJAX URL
-	nonce : null, // The Dynamically-Generated Nonce
 	favorite : favorites_data.favorite, // Active Button Text/HTML
 	favorited : favorites_data.favorited, // Inactive Button Text
 	include_count : favorites_data.includecount, // Whether to include the count in buttons
@@ -1071,11 +1123,11 @@ Favorites.authenticated = true;
 * WP Form Actions Used by the Plugin
 */
 Favorites.formActions = {
-	nonce : 'favorites_nonce',
 	favoritesarray : 'favorites_array',
 	favorite : 'favorites_favorite',
 	clearall : 'favorites_clear',
-	favoritelist : 'favorites_list'
+	favoritelist : 'favorites_list',
+	cookieConsent : 'favorites_cookie_consent'
 }
 
 /**
@@ -1088,7 +1140,6 @@ Favorites.Factory = function()
 
 	plugin.build = function()
 	{
-		new Favorites.NonceGenerator;
 		new Favorites.UserFavorites;
 		new Favorites.Lists;
 		new Favorites.Clear;
@@ -1097,6 +1148,7 @@ Favorites.Factory = function()
 		new Favorites.TotalCount;
 		new Favorites.PostFavoriteCount;
 		new Favorites.RequireAuthentication;
+		new Favorites.RequireConsent;
 	}
 
 	return plugin.build();

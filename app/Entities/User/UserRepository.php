@@ -36,7 +36,7 @@ class UserRepository
 	*/
 	public function getAllFavorites()
 	{
-		if ( isset($_POST['logged_in']) && intval($_POST['logged_in']) == 1 ) {
+		if ( is_user_logged_in() ) {
 			$all_favorites = $this->getLoggedInFavorites();
 		} else {
 			$saveType = $this->settings_repo->saveType();
@@ -61,8 +61,8 @@ class UserRepository
 	*/
 	public function getFavorites($user_id = null, $site_id = null, $group_id = null)
 	{
-		$logged_in = ( isset($_POST['logged_in']) && intval($_POST['logged_in']) == 1 && isset($_POST['user_id']) ) ? true : false;
-		if ( $logged_in || is_user_logged_in() || $user_id ) {
+		if ( is_user_logged_in() && !$user_id ) $user_id = get_current_user_id();
+		if ( is_user_logged_in() || $user_id ) {
 			$favorites = $this->getLoggedInFavorites($user_id, $site_id, $group_id);
 		} else {
 			$saveType = $this->settings_repo->saveType();
@@ -133,8 +133,7 @@ class UserRepository
 	*/
 	private function getLoggedInFavorites($user_id = null, $site_id = null, $group_id = null)
 	{
-		$user_id_post = ( isset($_POST['user_id']) ) ? intval($_POST['user_id']) : get_current_user_id();
-		$user_id = ( !is_null($user_id) ) ? $user_id : $user_id_post;
+		$user_id = ( is_null($user_id) ) ? get_current_user_id() : $user_id;
 		$favorites = get_user_meta($user_id, 'simplefavorites');
 		if ( empty($favorites) ) return array(array('site_id'=> 1, 'posts' => array(), 'groups' => array() ));
 
@@ -170,6 +169,7 @@ class UserRepository
 		$favorites = json_decode(stripslashes($_COOKIE['simplefavorites']), true);
 		$favorites = $this->favoritesWithSiteID($favorites);
 		$favorites = $this->favoritesWithGroups($favorites);
+		if ( isset($_POST['user_consent_accepted']) && $_POST['user_consent_accepted'] == 'true' ) $favorites[0]['consent_provided'] = time();
 		if ( !is_null($site_id) && is_null($group_id) ) $favorites = Helpers::pluckSiteFavorites($site_id, $favorites);
 		if ( !is_null($group_id) ) $favorites = Helpers::pluckGroupFavorites($group_id, $site_id, $favorites);
 		return $favorites;
@@ -210,5 +210,35 @@ class UserRepository
 		$favorites = $this->getAllFavorites();
 		$formatter = new FavoritesArrayFormatter;
 		return $formatter->format($favorites, $post_id, $site_id, $status);
+	}
+
+	/**
+	* Has the user consented to cookies (if applicable)
+	*/
+	public function consentedToCookies()
+	{
+		if ( $this->settings_repo->saveType() !== 'cookie' ) return true;
+		if ( isset($_POST['user_consent_accepted']) && $_POST['user_consent_accepted'] == 'true' ) return true;
+		if ( !$this->settings_repo->consent('require') ) return true;
+		if ( isset($_COOKIE['simplefavorites']) ){
+			$cookie = json_decode(stripslashes($_COOKIE['simplefavorites']), true);
+			if ( isset($cookie[0]['consent_provided']) ) return true;
+			if ( isset($cookie[0]['consent_denied']) ) return false;
+		}
+		return false;
+	}
+
+	/**
+	* Has the user denied consent to cookies explicitly
+	*/
+	public function deniedCookies()
+	{
+		if ( $this->settings_repo->saveType() !== 'cookie' ) return false;
+		if ( !$this->settings_repo->consent('require') ) return false;
+		if ( isset($_COOKIE['simplefavorites']) ){
+			$cookie = json_decode(stripslashes($_COOKIE['simplefavorites']), true);
+			if ( isset($cookie[0]['consent_denied']) ) return true;
+		}
+		return false;
 	}
 }

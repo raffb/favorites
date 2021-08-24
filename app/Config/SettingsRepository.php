@@ -56,6 +56,26 @@ class SettingsRepository
 	}
 
 	/**
+	* User Consent
+	* @since 2.2.0
+	* @return boolean
+	*/
+	public function consent($option)
+	{
+		$consent_option = get_option('simplefavorites_users');
+		if ( $option == 'require' ){
+			return (
+				isset($consent_option['consent'])
+				&& isset($consent_option['consent']['require'])
+				&& $consent_option['consent']['require'] == 'true') ? true : false;
+		}
+		if ( $option == 'modal' && isset($consent_option['consent']['modal']) ){
+			return ( $consent_option['consent']['modal'] !== '' ) ? apply_filters('the_content', $consent_option['consent']['modal']) : false;
+		}
+		return ( isset($consent_option['consent'][$option]) ) ? $consent_option['consent'][$option] : false;
+	}
+
+	/**
 	* Require Login? Shows button to unauthenticated users, but opens modal when trying to save
 	* @since 2.0.3
 	* @return boolean

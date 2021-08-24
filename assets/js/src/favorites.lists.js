@@ -32,6 +32,7 @@ Favorites.Lists = function()
 	*/
 	plugin.updateAllLists = function()
 	{
+		if ( typeof Favorites.userFavorites === 'undefined' ) return;
 		for ( var i = 0; i < Favorites.userFavorites.length; i++ ){
 			var lists = $(Favorites.selectors.list + '[data-siteid="' + Favorites.userFavorites[i].site_id + '"]');
 			for ( var c = 0; c < $(lists).length; c++ ){
@@ -62,7 +63,6 @@ Favorites.Lists = function()
 			dataType: 'json',
 			data: {
 				action : Favorites.formActions.favoritelist,
-				nonce : Favorites.jsData.nonce,
 				userid : user_id,
 				siteid : site_id,
 				include_links : include_links,
@@ -71,9 +71,7 @@ Favorites.Lists = function()
 				thumbnail_size : thumbnail_size,
 				include_excerpt : include_excerpt,
 				no_favorites : no_favorites,
-				post_types : post_types,
-				user_id_current : Favorites.jsData.user_id,
-				logged_in : Favorites.jsData.logged_in
+				post_types : post_types
 			},
 			success : function(data){
 				if ( Favorites.jsData.dev_mode ){

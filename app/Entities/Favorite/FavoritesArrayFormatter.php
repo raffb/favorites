@@ -104,7 +104,7 @@ class FavoritesArrayFormatter
 	private function checkCurrentPost()
 	{
 		if ( !isset($this->post_id) || !isset($this->site_id) ) return;
-		if ( isset($_POST['logged_in']) && $_POST['logged_in'] == '1' ) return;
+		if ( is_user_logged_in() ) return;
 		foreach ( $this->formatted_favorites as $site => $site_favorites ){
 			if ( $site_favorites['site_id'] == $this->site_id ) {
 				if ( isset($site_favorites['posts'][$this->post_id]) && $this->status == 'inactive' ){
@@ -123,7 +123,7 @@ class FavoritesArrayFormatter
 	{
 		if ( !has_post_thumbnail($post_id) ) return false;
 		$sizes = get_intermediate_image_sizes();
-		$thumbnails = array();
+		$thumbnails = [];
 		foreach ( $sizes as $size ){
 			$url = get_the_post_thumbnail_url($post_id, $size);
 			$img = '<img src="' . $url . '" alt="' . get_the_title($post_id) . '" class="favorites-list-thumbnail" />';
