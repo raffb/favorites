@@ -1,11 +1,11 @@
-<?php 
+<?php
 namespace Favorites\Entities\User;
 
 use Favorites\Config\SettingsRepository;
 use Favorites\Helpers;
 use Favorites\Entities\Favorite\FavoritesArrayFormatter;
 
-class UserRepository 
+class UserRepository
 {
 	/**
 	* Settings Repository
@@ -41,12 +41,12 @@ class UserRepository
 		} else {
 			$saveType = $this->settings_repo->saveType();
 			$favorites = ( $saveType == 'cookie' ) ? $this->getCookieFavorites() : $this->getSessionFavorites();
-			$all_favorites = $this->favoritesWithSiteID($favorites);			
+			$all_favorites = $this->favoritesWithSiteID($favorites);
 		}
-		
+
 		/**
 		 * Filter All of current user's favorites.
-		 * 
+		 *
 		 * @since	1.3.0
 		 * @param	array	The original current user's favorites.
 		 */
@@ -66,14 +66,14 @@ class UserRepository
 			$favorites = $this->getLoggedInFavorites($user_id, $site_id, $group_id);
 		} else {
 			$saveType = $this->settings_repo->saveType();
-			$favorites = ( $saveType == 'cookie' ) 
-				? $this->getCookieFavorites($site_id, $group_id) 
+			$favorites = ( $saveType == 'cookie' )
+				? $this->getCookieFavorites($site_id, $group_id)
 				: $this->getSessionFavorites($site_id, $group_id);
 		}
-		
+
 		/**
 		 * Filter a User's Favorites.
-		 * 
+		 *
 		 * @since	1.3.0
 		 * @param	array	The original User's Favorites.
 		 */
@@ -137,7 +137,7 @@ class UserRepository
 		$user_id = ( !is_null($user_id) ) ? $user_id : $user_id_post;
 		$favorites = get_user_meta($user_id, 'simplefavorites');
 		if ( empty($favorites) ) return array(array('site_id'=> 1, 'posts' => array(), 'groups' => array() ));
-		
+
 		$favorites = $this->favoritesWithSiteID($favorites[0]);
 		$favorites = $this->favoritesWithGroups($favorites);
 
@@ -185,6 +185,7 @@ class UserRepository
 	public function isFavorite($post_id, $site_id = 1, $user_id = null, $group_id = null)
 	{
 		$favorites = $this->getFavorites($user_id, $site_id, $group_id);
+		if( !is_array($favorites) ) $favorites = array();
 		if ( in_array($post_id, $favorites) ) return true;
 		return false;
 	}
