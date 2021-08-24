@@ -1,9 +1,9 @@
-<?php 
+<?php
 namespace Favorites\Config;
 
 use Favorites\Helpers;
 
-class SettingsRepository 
+class SettingsRepository
 {
 	/**
 	* Output Dependency
@@ -29,6 +29,17 @@ class SettingsRepository
 	}
 
 	/**
+	 * Rest API Enabled
+	 * @since 2.2
+	 * @return string
+	 */
+	public function restApiEnabled()
+	{
+		$option = get_option('simplefavorites_api_enabled');
+		return ( isset($option) && !!$option);
+	}
+
+	/**
 	* Anonymous Display Options
 	* @param string option (array key)
 	* @since 1.0
@@ -37,7 +48,7 @@ class SettingsRepository
 	public function anonymous($option = 'display')
 	{
 		$anon_option = get_option('simplefavorites_users');
-		if ( isset($anon_option['anonymous'][$option]) 
+		if ( isset($anon_option['anonymous'][$option])
 			&& $anon_option['anonymous'][$option] == 'true') {
 			return true;
 		}
@@ -52,11 +63,11 @@ class SettingsRepository
 	public function requireLogin()
 	{
 		$option = get_option('simplefavorites_users');
-		if ( isset($option['anonymous']['display']) 
+		if ( isset($option['anonymous']['display'])
 			&& $option['anonymous']['display'] == 'true') {
 			return false;
 		}
-		if ( isset($option['require_login']) 
+		if ( isset($option['require_login'])
 			&& $option['require_login'] == 'true') {
 			return true;
 		}
@@ -71,11 +82,11 @@ class SettingsRepository
 	public function redirectAnonymous()
 	{
 		$option = get_option('simplefavorites_users');
-		if ( isset($option['anonymous']['display']) 
+		if ( isset($option['anonymous']['display'])
 			&& $option['anonymous']['display'] == 'true') {
 			return false;
 		}
-		if ( isset($option['redirect_anonymous']) 
+		if ( isset($option['redirect_anonymous'])
 			&& $option['redirect_anonymous'] == 'true') {
 			return true;
 		}
@@ -90,11 +101,11 @@ class SettingsRepository
 	public function redirectAnonymousId()
 	{
 		$option = get_option('simplefavorites_users');
-		if ( isset($option['anonymous']['display']) 
+		if ( isset($option['anonymous']['display'])
 			&& $option['anonymous']['display'] == 'true') {
 			return false;
 		}
-		if ( isset($option['anonymous_redirect_id']) 
+		if ( isset($option['anonymous_redirect_id'])
 			&& $option['anonymous_redirect_id'] !== '') {
 			return $option['anonymous_redirect_id'];
 		}
@@ -109,7 +120,7 @@ class SettingsRepository
 	public function authenticationModalContent($raw = false)
 	{
 		$option = get_option('simplefavorites_users');
-		if ( isset($option['authentication_modal']) 
+		if ( isset($option['authentication_modal'])
 			&& $option['authentication_modal'] !== '') {
 			$content = $option['authentication_modal'];
 			if ( $raw ) return $content;
@@ -160,7 +171,7 @@ class SettingsRepository
 	public function buttonText()
 	{
 		$option = get_option('simplefavorites_display');
-		if ( !isset($option['buttontext']) || $option['buttontext'] == "" ) 
+		if ( !isset($option['buttontext']) || $option['buttontext'] == "" )
 			return __('Favorite', 'favorites');
 		return esc_html($option['buttontext']);
 	}
@@ -172,7 +183,7 @@ class SettingsRepository
 	public function buttonTextFavorited()
 	{
 		$option = get_option('simplefavorites_display');
-		if ( !isset($option['buttontextfavorited']) || $option['buttontextfavorited'] == "" ) 
+		if ( !isset($option['buttontextfavorited']) || $option['buttontextfavorited'] == "" )
 			return __('Favorited', 'favorites');
 		return esc_html($option['buttontextfavorited']);
 	}
@@ -184,7 +195,7 @@ class SettingsRepository
 	public function clearFavoritesText()
 	{
 		$option = get_option('simplefavorites_display');
-		if ( !isset($option['clearfavorites']) || $option['clearfavorites'] == "" ) 
+		if ( !isset($option['clearfavorites']) || $option['clearfavorites'] == "" )
 			return __('Clear Favorites', 'favorites');
 		return esc_html($option['clearfavorites']);
 	}
@@ -261,7 +272,7 @@ class SettingsRepository
 		if ( isset($option['loadingindicator']['include_html']) && $option['loadingindicator']['include_html'] ) return $this->loadingHtml($state);
 		if ( !isset($option['loadingindicator']['include_image']) || $option['loadingindicator']['include_image'] !== 'true' ) return false;
 		$image_url = Helpers::plugin_url() . '/assets/images/loading.gif';
-		
+
 		if ( $state == 'inactive' ){
 			$image_url = apply_filters('simplefavorites_spinner_url', $image_url);
 			$image_url = apply_filters('favorites/button/loading/image_url', $image_url);
@@ -270,7 +281,7 @@ class SettingsRepository
 			$image = '<img src="' . $image_url . '" class="simplefavorites-loading" aria-hidden="true" />';
 			return $image;
 		}
-		
+
 		// active state (some users might want different color for active)
 
 		// deprecated filter
@@ -296,7 +307,7 @@ class SettingsRepository
 	}
 
 	/**
-	* Loading CSS/Icon 
+	* Loading CSS/Icon
 	* @return string
 	* @param $state string
 	* @uses simplefavorites_spinner_html filter, simplefavorites_spinner_html_active filter
@@ -306,7 +317,7 @@ class SettingsRepository
 	{
 		$option = get_option('simplefavorites_display');
 		if ( !isset($option['loadingindicator']['include_html']) || $option['loadingindicator']['include_html'] !== 'true' ) return false;
-		
+
 		if ( $state == 'inactive' )	{
 			// Deprecated filter
 			$html = apply_filters('simplefavorites_spinner_html', '<span class="sf-icon-spinner-wrapper"><i class="sf-icon-spinner"></i></span>');
@@ -511,6 +522,5 @@ class SettingsRepository
 
 		return ( isset($option[$setting]) ) ? $option[$setting] : false;
 	}
-
 
 }
