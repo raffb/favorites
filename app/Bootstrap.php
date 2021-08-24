@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace Favorites;
 
 use Favorites\Config\SettingsRepository;
@@ -6,7 +6,7 @@ use Favorites\Config\SettingsRepository;
 /**
 * Plugin Bootstrap
 */
-class Bootstrap 
+class Bootstrap
 {
 	/**
 	* Settings Repository
@@ -18,6 +18,7 @@ class Bootstrap
 	{
 		$this->settings_repo = new SettingsRepository;
 		add_action( 'init', array($this, 'init') );
+		add_action( 'rest_api_init', array($this, 'apiInit'));
 		add_action( 'admin_init', array($this, 'adminInit'));
 		add_filter( 'plugin_action_links_' . 'favorites/favorites.php', array($this, 'settingsLink' ) );
 		add_action( 'plugins_loaded', array($this, 'addLocalization') );
@@ -44,6 +45,15 @@ class Bootstrap
 	}
 
 	/**
+	 * API Initialization
+	 */
+	public function apiInit()
+	{
+		$restAPIEnabled = $this->settings_repo->restApiEnabled();
+		if($restAPIEnabled) new Events\RegisterAPIEndpoints;
+	}
+
+	/**
 	* Admin Init
 	*/
 	public function adminInit()
@@ -55,12 +65,12 @@ class Bootstrap
 	* Add a link to the settings on the plugin page
 	*/
 	public function settingsLink($links)
-	{ 
-		$settings_link = '<a href="options-general.php?page=simple-favorites">' . __('Settings', 'favorites') . '</a>'; 
-		$help_link = '<a href="http://favoriteposts.com">' . __('FAQ', 'favorites') . '</a>'; 
-		array_unshift($links, $help_link); 
+	{
+		$settings_link = '<a href="options-general.php?page=simple-favorites">' . __('Settings', 'favorites') . '</a>';
+		$help_link = '<a href="http://favoriteposts.com">' . __('FAQ', 'favorites') . '</a>';
+		array_unshift($links, $help_link);
 		array_unshift($links, $settings_link);
-		return $links; 
+		return $links;
 	}
 
 	/**
@@ -69,8 +79,8 @@ class Bootstrap
 	public function addLocalization()
 	{
 		load_plugin_textdomain(
-			'favorites', 
-			false, 
+			'favorites',
+			false,
 			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages' );
 	}
 
