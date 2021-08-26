@@ -51,17 +51,7 @@ class FavoriteAdd extends ListenerBase
 			$favorite->update($this->data['postid'], $this->data['status'], $this->data['siteid'], $this->data['groupid']);
 			$this->afterUpdateAction();
 			$this->response(array(
-				'status' => 'success',
-				'favorite_data' => array(
-					'id' => $this->data['postid'],
-					'siteid' => $this->data['siteid'],
-					'status' => $this->data['status'],
-					'groupid' => $this->data['groupid'],
-					'save_type' => $favorite->saveType(),
-					'logged_in' => $this->data['logged_in'],
-					'user_id' => $this->data['user_id']
-				),
-				'favorites' => $this->user_repo->formattedFavorites($this->data['postid'], $this->data['siteid'], $this->data['status'])
+				'status' => 'success'
 			));
 		} catch ( \Exception $e ){
 			return $this->sendError($e->getMessage());
