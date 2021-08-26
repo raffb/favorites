@@ -32,9 +32,14 @@ class UserFavoriteList extends ListenerBase
 
 	private function sendList()
 	{
-		$this->response(array(
-			'status' => 'success',
-			'data' => $this->user_favorites->getFavoritesArray($this->data['user_id'], $this->data['siteid'])
-		));
+		try {
+			$this->response(array(
+				'status' => 'success',
+				'data' => $this->user_favorites->getFavoritesArray($this->data['user_id'], $this->data['siteid'])
+			));
+		} catch ( \Exception $e ){
+			return $this->sendError($e->getMessage());
+		}
+
 	}
 }
