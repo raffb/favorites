@@ -37,7 +37,7 @@ class FavoriteAdd extends ListenerBase
 		$this->data['status'] = ( $status == 'active') ? 'active' : 'inactive';
 		$this->data['groupid'] = ( $groupId && $groupId !== '' ) ? intval($groupId) : 1;
 		$this->data['logged_in'] = ( $loggedIn && $loggedIn !== '' ) ? true : null;
-		$this->data['user_id'] = ( $userId && $userId !== '' ) ? intval($userId) : null;
+		$this->data['user_id'] = ( $userId && $userId !== '' ) ? $userId : null;
 	}
 
 	/**
