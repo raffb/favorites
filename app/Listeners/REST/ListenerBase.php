@@ -53,6 +53,9 @@ abstract class ListenerBase
 	*/
 	protected function response($response)
 	{
+		header( 'Access-Control-Allow-Origin: *' );
+		header( 'Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE' );
+		header( 'Access-Control-Allow-Credentials: true' );
 		return wp_send_json($response);
 	}
 }
